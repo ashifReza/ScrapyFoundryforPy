@@ -177,20 +177,24 @@ class MyfontsSpider(scrapy.Spider):
     
     def start_requests(self):
         foundry_name = input("Enter foundry name: ")
-        for url in self.start_urls:
-            form_data = self.construct_form_data(foundry_name)
-            yield scrapy.Request(url, method='POST', headers=self.headers, body=json.dumps(form_data), callback=self.parse_json)
+        form_data_list = self.construct_form_data(foundry_name)
+        for form_data in form_data_list:
+            yield scrapy.Request(url=self.start_urls[0], method='POST', headers=self.headers, body=json.dumps(form_data), callback=self.parse_json)
     
     def construct_form_data(self, foundry_name):
-        form_data = {
-            "requests": [
-                {
-                    "indexName": "universal_search_data",
-                    "params": f"analyticsTags=foundry_myfonts&attributesToHighlight=%5B%5D&attributesToRetrieve=%5B%22font_count%22%2C%22family_id%22%2C%22foundry_handle%22%2C%22foundry_name%22%2C%22foundry_title%22%2C%22foundry_logo%22%2C%22foundry_location%22%2C%22foundry_image_urls%22%2C%22foundry_description%22%2C%22handle%22%2C%22has_free%22%2C%22image_urls%22%2C%22font_data.file_type%22%2C%22font_data.handle%22%2C%22font_data.md5%22%2C%22font_data.name%22%2C%22font_data.pim_style_id%22%2C%22name%22%2C%22prices%22%2C%22public_tags%22%2C%22_tags%22%2C%22_tags_de%22%2C%22_tags_es%22%2C%22_tags_fr%22%2C%22_tags_pt%22%2C%22render_text%22%2C%22title%22%2C%22included_packages%22%5D&facets=%5B%22*%22%5D&filters=foundry_handle%3A{foundry_name}&highlightPostTag=%3C%2Fais-highlight-0000000000%3E&highlightPreTag=%3Cais-highlight-0000000000%3E&hitsPerPage=20&maxValuesPerFacet=200&page=0&query=&ruleContexts=foundry_myfonts&tagFilters=&clickAnalytics=true&analytics=true&userToken=anonymous-105ac04a-4638-47fd-a95f-e0f04ff2e34b&facetFilters=%5B%5D"
-                }
-            ]
-        }
-        return form_data
+        form_data_list = []
+        for page_num in range(4):
+            form_data = {
+                "requests": [
+                    {
+                        "indexName": "universal_search_data",
+                        "params": f"analyticsTags=foundry_myfonts&attributesToHighlight=%5B%5D&attributesToRetrieve=%5B%22font_count%22%2C%22family_id%22%2C%22foundry_handle%22%2C%22foundry_name%22%2C%22foundry_title%22%2C%22foundry_logo%22%2C%22foundry_location%22%2C%22foundry_image_urls%22%2C%22foundry_description%22%2C%22handle%22%2C%22has_free%22%2C%22image_urls%22%2C%22font_data.file_type%22%2C%22font_data.handle%22%2C%22font_data.md5%22%2C%22font_data.name%22%2C%22font_data.pim_style_id%22%2C%22name%22%2C%22prices%22%2C%22public_tags%22%2C%22_tags%22%2C%22_tags_de%22%2C%22_tags_es%22%2C%22_tags_fr%22%2C%22_tags_pt%22%2C%22render_text%22%2C%22title%22%2C%22included_packages%22%5D&facets=%5B%22*%22%5D&filters=foundry_handle%3A{foundry_name}&highlightPostTag=%3C%2Fais-highlight-0000000000%3E&highlightPreTag=%3Cais-highlight-0000000000%3E&hitsPerPage=20&maxValuesPerFacet=200&page={page_num}&query=&ruleContexts=foundry_myfonts&tagFilters=&clickAnalytics=true&analytics=true&userToken=anonymous-105ac04a-4638-47fd-a95f-e0f04ff2e34b&facetFilters=%5B%5D"
+                    }
+                ]
+            }
+            form_data_list.append(form_data)
+        
+        return form_data_list
     
     def parse_json(self, response):
         if response.status == 404:
@@ -236,4 +240,5 @@ class MyfontsSpider(scrapy.Spider):
             self.logger.info(f"Image {idx} for {name} downloaded successfully: {image_path}")
         except Exception as e:
             self.logger.error(f"Error occurred while saving image {idx} for {name}: {e}")
+
 
